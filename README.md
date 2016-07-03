@@ -1,67 +1,35 @@
-1. Arranque
+# 1. Crear imagen Alarmas
+
+```bash
+$ cd alarmas-app
+$ mvn clean package docker:build
+```
+
+# 2. Arranque
  
-docker-compose -f mysql.compose up -d
-docker-compose -f alarmas.compose up -d
+```bash
+$ docker-compose -f mysql.compose up -d
+$ docker-compose -f alarmas.compose up -d
+```
 
-2. Carga datos Mysql
+# 3. Carga datos Mysql
 
-mysql -uroot -proot -h127.0.0.1 -P3306 salud < mysql-dumps/alarmas.dump.v6.sql
+```bash
+$ mysql -uroot -proot -h127.0.0.1 -P3306 salud < mysql-dumps/alarmas.dump.v8.sql
+```
 
-3. Exportacion Mysql a CSV
+# 4. Exportacion Mysql a CSV
 
--- POLIZAS MYSQL
-SELECT 'poliza', 'certificado', 'fechaAlta', 'fechaBaja', 'codTipoProd', 'codcopago', 'prima', 'periodo', 'tipopag', 'poliza', 'certificado'
-UNION 
-SELECT poliza, certificado, fechaAlta, fechaBaja, codTipoProd, codcopago, prima, periodo, tipopag, poliza, certificado
-FROM polizas
-INTO OUTFILE '/var/lib/mysql-files/polizas.csv'
-FIELDS ENCLOSED BY '"' TERMINATED BY ',' ESCAPED BY '' 
-LINES TERMINATED BY '\r\n';
+Ejecutar todas las consultas del fichero `mysql-dumps/migracion.sql` en el orden que aparecen 
 
+# 5. Carga exportación
 
--- PRODUCTO MYSQL
-SELECT 'idproducto', 'descripcion', 'idproducto'
-UNION 
-SELECT idproducto, descripcion, idproducto
-FROM productosalud
-INTO OUTFILE '/var/lib/mysql-files/producto.csv'
-FIELDS ENCLOSED BY '"' TERMINATED BY ',' ESCAPED BY '' 
-LINES TERMINATED BY '\r\n';
+Abrir navegador y acceder a la consola de Neo4j usando la URL: http://localhost:7474/
 
-4. Accesso a Neo4j
+Ejecutar el contenido de los ficheros `cyp` numerados del directorio `cypher` en orden, empezando por `1_limpiar.cyp` y terminando por `21_liquidacion_prestacion.cyp`
 
-http://localhost:7474/
+# Verificar aplicación alarmas
 
-5. Carga esportación
-
--- PRODUCTOS
-LOAD CSV WITH HEADERS FROM 'file:///files/productos.csv' AS line
-CREATE (producto:Producto {id: TOINT(line.idproducto) })
-SET producto.nombre = line.descripcion
-RETURN producto
-
-
--- POLIZAS
-LOAD CSV WITH HEADERS FROM 'file:///files/polizas.csv' AS line
-CREATE (poliza:Poliza {id: TOINT(line.poliza) })
-SET poliza.prima = TOINT(line.prima)
-RETURN poliza
-
-
--- POLIZAS Y SUS PRODUCTOS
-LOAD CSV WITH HEADERS FROM 'file:///files/polizas.csv' AS line
-MATCH (poliza:Poliza {id: TOINT(line.poliza) })
-MATCH (producto:Producto {id: TOINT(line.codTipoProd) })
-CREATE (producto)-[:ASOCIADO_A]->(poliza)
-RETURN poliza, producto
-
-6. Verificar aplicación alarmas
-
-http://localhost:8081/
-
-Deberia obtener un mensaje similar a:
-
-Poliza INTEGRAL obtenida!
-
-
-
+```bash
+$ docker-compose -f alarmas.compose logs alarmas
+```
