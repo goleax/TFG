@@ -1,0 +1,12 @@
+# Gestiona la base de datos de MySQL
+# Arranque: docker-compose -f mysql.compose up -d
+# Parada: docker-compose -f mysql.compose up -d
+mysql:
+    image: mysql:latest
+    environment:
+        - MYSQL_ROOT_PASSWORD=root
+    ports:
+        - 3306:3306
+    volumes:
+        - ./mysql/data:/var/lib/mysql
+        - ./csv:/var/lib/mysql-files

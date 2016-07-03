@@ -1,0 +1,21 @@
+# Gestiona el arranque de los servicios de la aplicación de alarmas
+# Arranque: docker-compose -f alarmas.compose up -d
+# Parada: docker-compose -f alarmas.compose up -d
+neo4j:
+    image: neo4j:latest
+    ports:
+        - 7474:7474
+        - 7687:7687
+    volumes:
+        - ./neo4j/data:/data
+        - ./csv:/files
+    environment:
+        - NEO4J_AUTH=none
+alarmas:
+    image: alarmas-app:latest
+    ports:
+        - 8080:8080
+    links:
+        - neo4j
+    environment:
+        - NEO4J_URL=$NEO4J_PORT_7474_TCP
