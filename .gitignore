@@ -9,3 +9,6 @@ buildNumber.properties
 .mvn/timing.properties
 neo4j/data
 mysql/data
+vcs.xml
+*.iml
+.idea/

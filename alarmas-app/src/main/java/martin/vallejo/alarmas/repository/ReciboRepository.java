@@ -12,7 +12,7 @@ public interface ReciboRepository extends GraphRepository<Acto> {
     @Query("MATCH (pe:Prestacion)--(re:Recibo)--(po:Poliza) " +
             " WITH  " +
             "	re, " +
-            "	SUM(pe.importe_proveedor) AS importe_solicitado, " +
+            "	SUM(pe.importe_cliente) AS importe_solicitado, " +
             "	re.importe/12 AS importe_esperado " +
             "WHERE importe_solicitado > importe_esperado " +
             "RETURN re" )
